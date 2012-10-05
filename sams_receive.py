@@ -1,55 +1,56 @@
 #! /usr/bin/env python
-import pickle
+
+import os
 
 from libsams import Addressbook, Receiver
 from os import environ
 from rsa import PublicKey, PrivateKey
 from datetime import datetime
 
-dt = datetime(2012, 10, 05, 00, 00, 00)
+# prepare environment
 home = environ.get('HOME')
 user = environ.get('USER')
-last_receive = '{home}/.sams/messages/last'.format(home=home)
-try:
-    with open(last_receive, 'rw') as last:
-        dt = pickle.load(last)
-except:
-    dt = datetime(1990, 1, 1, 00, 00)
+os.chdir('{home}/.sams/'.format(home=home))
 
-addressbookfile = '{home}/.sams/addressbook.csv'.format(home=home)
-addressbook = Addressbook(addressbookfile)
-my_address = addressbook.get_by_name(user)
-n = int(my_address['n'])
-e = int(my_address['e'])
+# get pubkey
+addressbook = Addressbook('addressbook.csv')
+own_address = addressbook.get_by_name(user)
+n = int(own_address['n'])
+e = int(own_address['e'])
 pubkey = PublicKey(n, e)
 
-privatefile = '{home}/.sams/private.pem'.format(home=home)
-with open(privatefile, 'r') as privatefile:
+# get privkey
+with open('private.pem', 'r') as privatefile:
     keydata = privatefile.read()
 privkey = PrivateKey.load_pkcs1(keydata)
 
+# receive messages
 receiver = Receiver(privkey, pubkey)
-messages = receiver(dt)
+mtime = 0
+files = os.listdir('messages/')
+for file in files:
+    filestat = os.stat('messages/{file}'.format(file=file))
+    if filestat.st_mtime > mtime:
+        mtime = filestat.st_mtime
+if mtime:
+    dt = datetime.fromtimestamp(mtime)
+    messages = receiver(dt)
+else:
+    messages = receiver()
 
+# output result
 print 'You have {new} new Messages!'.format(new=len(messages))
 
+# save messages to conversation files
 for message in messages:
-    sender = message['author']
+    author = message['author']
     msg = message['msg']
     date = message['date']
-    date = ('{day:02d}.{month:02d}.{year}'
-            '{hour:02d}:{minute:02d}').format(day=date.day, month=date.month,
-                                              year=date.year,
-                                              hour=date.hour,
-                                              minute=date.minute)
-
-    uri = '{home}/.sams/messages/{sender}.txt'.format(home=home,
-                                                      sender=sender)
-    with open(uri, 'a') as file:
-        file.write(date + '\n')
-        file.write(msg)
-        file.write('#' * 10 + '\n')
-
-last_receive = '{home}/.sams/messages/last'.format(home=home)
-with open(last_receive, 'w') as last:
-    pickle.dump(now, last)
+    date_str = date.strftime("%A, %d. %B %Y %I:%M%p")
+    file = 'messages/{author}.txt'.format(author=author)
+    
+    with open(file, 'a') as file:
+        message = ("{date}\n"
+                   "{message}\n"
+                   "##########\n").format(date=date_str, message=msg)
+        file.write(message)

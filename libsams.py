@@ -80,11 +80,15 @@ class Receiver(object):
         self.pubkey = pubkey
         self.connection = Connection(host, port)
 
-    def __call__(self, since):
+    def __call__(self, since=None):
         """Receive messages since datetime."""
         collection = self.connection.sams.messages
         pubkey_ident = '{n}.{e}'.format(n=self.pubkey.n, e=self.pubkey.e)
-        cursor = collection.find({'to': pubkey_ident, 'date': {'$gt': since}})
+        query = dict(to=pubkey_ident)
+        # neccessary for the first receive
+        if not since is None:
+            query['date'] = {'$gt': since}
+        cursor = collection.find(query)
         messages = []
         for doc in cursor:
             key = rsa.decrypt(doc['key'], self.privkey)
