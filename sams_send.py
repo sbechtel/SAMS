@@ -1,13 +1,16 @@
 #! /usr/bin/env python
 
-import sys
-import os
+import sys, os
 
 from libsams import Addressbook, Sender
 from rsa import PublicKey
 
 message = sys.stdin.read()
-receiver_name = sys.argv[1]
+
+try:
+    receiver_name = sys.argv[1]
+except IndexError:
+    sys.exit('usage: {command} receiver\n'.format(command=sys.argv[0]))
 
 home = os.environ.get('HOME')
 uri = '{home}/.sams/addressbook.csv'.format(home=home)
