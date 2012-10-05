@@ -1,4 +1,6 @@
-import rsa, os, csv
+import rsa
+import os
+import csv
 
 pub, priv = rsa.newkeys(512)
 

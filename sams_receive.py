@@ -6,7 +6,7 @@ from os import environ
 from rsa import PublicKey, PrivateKey
 from datetime import datetime
 
-now = datetime.now()
+dt = datetime(2012, 10, 05, 00, 00, 00)
 home = environ.get('HOME')
 user = environ.get('USER')
 last_receive = '{home}/.sams/messages/last'.format(home=home)

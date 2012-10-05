@@ -14,6 +14,7 @@ user = environ.get('USER')
 host = environ.get('SAMS_HOST')
 port = int(environ.get('SAMS_PORT'))
 
+
 class Addressbook(object):
     """Represent Addressbook."""
 
@@ -44,6 +45,7 @@ class Addressbook(object):
             writer = csv.DictWriter(addressbook, ['name', 'n', 'e'])
             writer.writerow(address)
 
+
 class Sender(object):
     """Represents Sender."""
 
@@ -63,10 +65,11 @@ class Sender(object):
         user_crypto_bin = Binary(user_crypto)
         msg_crypto_bin = Binary(msg_crypto)
         key_crypto_bin = Binary(key_crypto)
-        doc = dict(author=user_crypto_bin, to=self.pubkey_ident, 
+        doc = dict(author=user_crypto_bin, to=self.pubkey_ident,
                    date=datetime.now(), msg=msg_crypto_bin, key=key_crypto_bin)
         collection = self.connection.sams.messages
         collection.insert(doc)
+
 
 class Receiver(object):
     """Represents Receiver."""
