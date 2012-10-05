@@ -53,7 +53,7 @@ class Sender(object):
         """Init Sender with pubkey."""
         self.pubkey = pubkey
         self.key = Random.get_random_bytes(16)
-        self.connection = Connection(host, port)
+        self.connection = Connection(host, port, tz_aware=True)
         self.pubkey_ident = '{n}.{e}'.format(n=self.pubkey.n, e=self.pubkey.e)
 
     def __call__(self, msg):
@@ -78,17 +78,17 @@ class Receiver(object):
         """Init Receiver with privkey."""
         self.privkey = privkey
         self.pubkey = pubkey
-        self.connection = Connection(host, port)
+        self.connection = Connection(host, port, tz_aware=True)
 
     def __call__(self, since=None):
         """Receive messages since datetime."""
         collection = self.connection.sams.messages
         pubkey_ident = '{n}.{e}'.format(n=self.pubkey.n, e=self.pubkey.e)
-        query = dict(to=pubkey_ident)
+        query = {'to': pubkey_ident}
         # neccessary for the first receive
         if not since is None:
-            query['date'] = {'$gt': since}
-        cursor = collection.find(query)
+            query['date'] = {'$gte': since}
+        cursor = collection.find(query).sort('date')
         messages = []
         for doc in cursor:
             key = rsa.decrypt(doc['key'], self.privkey)
