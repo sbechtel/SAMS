@@ -5,7 +5,7 @@ from os import environ
 from rsa import PublicKey, PrivateKey
 from datetime import datetime
 
-dt = datetime(2012,10,05,00,00,00)
+dt = datetime(2012, 10, 05, 00, 00, 00)
 home = environ.get('HOME')
 user = environ.get('USER')
 addressbookfile = '{home}/.sams/addressbook.csv'.format(home=home)

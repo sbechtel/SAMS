@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-import sys, os
+import sys
+import os
 
 from libsams import Addressbook, Sender
 from rsa import PublicKey
