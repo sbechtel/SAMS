@@ -33,7 +33,7 @@ for file in files:
     if filestat.st_mtime > mtime:
         mtime = filestat.st_mtime
 if mtime:
-    dt = datetime.utcfromtimestamp(mtime)
+    dt = datetime.fromtimestamp(mtime)
     messages = receiver(dt)
 else:
     messages = receiver()
